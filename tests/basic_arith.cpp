@@ -1,8 +1,12 @@
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
 #include "../src/num.h"
+using args = std::pair<crolol::num, crolol::num>;
+using argans = std::pair<args, crolol::num>;
+using std::int64_t;
 
 void success()
 {
@@ -19,13 +23,48 @@ void report(const bool b)
 	b ? success() : failure();
 }
 
-using args = std::pair<crolol::num, crolol::num>;
-using argans = std::pair<args, crolol::num>;
+static const int64_t min = crolol::num::min.getraw();
+static const int64_t max = crolol::num::max.getraw();
+
+args make_args(int64_t n, int64_t m)
+{
+	return std::make_pair(
+		crolol::make_numi(n),
+		crolol::make_numi(m));
+}
+
+args make_argsf(long double n, long double m)
+{
+	return std::make_pair(
+		crolol::make_numf(n),
+		crolol::make_numf(m));
+}
+
+argans make_argans(const args& a, int64_t b)
+{
+	return std::make_pair(a, crolol::make_numi(b));
+}
+
+argans make_argansf(const args& a, long double m)
+{
+	return std::make_pair(a, crolol::make_numf(m));
+}
 
 const static std::vector<argans> add_args = {
-	std::make_pair(std::make_pair(0, 0), 0),
-	std::make_pair(std::make_pair(1, 1), 2),
-	std::make_pair(std::make_pair(10, 20), 30)
+	make_argans(make_args(0, 0), 0),
+	make_argans(make_args(1, 1), 2),
+	make_argans(make_args(1, 2), 3),
+	make_argans(make_args(2, 1), 3),
+	make_argans(make_args(5, 3), 8),
+	make_argans(make_args(-5, 3), -2),
+	make_argans(make_args(5, -3), 2),
+	make_argans(make_args(-5, -3), -8),
+	make_argansf(make_argsf(5.2, 3.1), 8.3),
+	make_argansf(make_argsf(-5.2, 3.1), -2.1),
+	make_argansf(make_argsf(5.2, -3.1), 2.1),
+	make_argansf(make_argsf(-5.2, -3.1), -8.3),
+	make_argans(make_args(min, -1), min),
+	make_argans(make_args(max, 1), max),
 };
 
 bool add_test()
@@ -56,11 +95,57 @@ bool add_test()
 	return success;
 }
 
+const static std::vector<argans> sub_args = {
+/*	make_argans(make_args(0, 0), 0),
+	make_argans(make_args(1, 1), 0),
+	make_argans(make_args(1, 2), -1),
+	make_argans(make_args(2, 1), 1),*/
+	make_argans(make_args(5, 3), 2),
+	make_argans(make_args(-5, 3), -8),
+	make_argans(make_args(5, -3), 8),
+	make_argans(make_args(-5, -3), -2),
+/*	make_argansf(make_argsf(5.2, 3.1), 2.1),
+	make_argansf(make_argsf(-5.2, 3.1), -8.3),
+	make_argansf(make_argsf(5.2, -3.1), 8.3),
+	make_argansf(make_argsf(-5.2, -3.1), -2.1),*/
+	make_argans(make_args(min, 1), min),
+	make_argans(make_args(max, -1), max),
+};
+
+bool sub_test()
+{
+	bool success = true;
+	
+	for (const argans& arg_and_ans: sub_args) {
+		const crolol::num lhs = arg_and_ans.first.first;
+		const crolol::num rhs = arg_and_ans.first.second;
+		const crolol::num ans = arg_and_ans.second;
+		const crolol::num result = lhs - rhs;
+		
+		if (not crolol::equals(ans, result)) {
+			success = false;
+			
+			std::cout << static_cast<std::string>(lhs) << " - "
+				<< static_cast<std::string>(rhs)
+				<< " should be "
+				<< static_cast<std::string>(ans) << ", was "
+				<< static_cast<std::string>(result)
+				<< std::endl;
+		}
+	}
+	
+	std::cout << "Subtraction: ";
+	report(success);
+	
+	return success;
+}
+
 int main()
 {
 	bool success = true;
 	
 	success &= add_test();
+	success &= sub_test();
 	
 	return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }

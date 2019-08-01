@@ -1,111 +1,106 @@
 #ifndef CROLOL_NUM_H
 #define CROLOL_NUM_H
 
+#include <cstdint>
 #include <string>
-#include <gmp.h>
-#include <gmpxx.h>
+#include <type_traits>
 
 namespace crolol {
 	class num;
 	
-	bool equals(const num& lhs, const num& rhs);
-	bool lessthan(const num& lhs, const num& rhs);
-	bool lessequals(const num& lhs, const num& rhs);
+	bool equals(num, num);
+	bool lessthan(num, num);
+	bool lessequals(num, num);
 	
-	num abs(const num& n);
-	num sqrt(const num& n);
-	num sin(const num& n);
-	num cos(const num& n);
-	num tan(const num& n);
-	num arcsin(const num& n);
-	num arccos(const num& n);
-	num arctan(const num& n);
+	num abs(num);
+	num sqrt(num);
+	num sin(num);
+	num cos(num);
+	num tan(num);
+	num arcsin(num);
+	num arccos(num);
+	num arctan(num);
+	
+	num make_numi(std::int64_t i) noexcept;
+	num make_numf(long double ld) noexcept;
 }
 
 // In order: addition, subtraction, multiplication, division, modulo, 
 // and exponentiation.
-crolol::num operator+(crolol::num lhs, const crolol::num& rhs);
-crolol::num operator-(crolol::num lhs, const crolol::num& rhs);
-crolol::num operator*(crolol::num lhs, const crolol::num& rhs);
-crolol::num operator/(crolol::num lhs, const crolol::num& rhs);
-crolol::num operator%(crolol::num lhs, const crolol::num& rhs);
-crolol::num operator^(const crolol::num& lhs, const crolol::num& rhs);
+crolol::num operator+(crolol::num, crolol::num);
+crolol::num operator-(crolol::num, crolol::num);
+crolol::num operator*(crolol::num, crolol::num);
+crolol::num operator/(crolol::num, crolol::num);
+crolol::num operator%(crolol::num, crolol::num);
+crolol::num operator^(crolol::num, crolol::num);
 // Unary negation.
-crolol::num operator-(const crolol::num& n);
+crolol::num operator-(crolol::num);
 // Logical NOT. Returns truthy or falsy.
-crolol::num operator!(const crolol::num& n);
+crolol::num operator!(crolol::num);
 // Returns truthy or falsy.
-crolol::num operator==(const crolol::num& lhs, const crolol::num& rhs);
-crolol::num operator!=(const crolol::num&, const crolol::num&);
-crolol::num operator<(const crolol::num&, const crolol::num&);
-crolol::num operator<=(const crolol::num&, const crolol::num&);
-crolol::num operator>(const crolol::num&, const crolol::num&);
-crolol::num operator>=(const crolol::num&, const crolol::num&);
-crolol::num operator&&(const crolol::num& lhs, const crolol::num& rhs);
-crolol::num operator||(const crolol::num& lhs, const crolol::num& rhs);
+crolol::num operator==(crolol::num, crolol::num);
+crolol::num operator!=(crolol::num, crolol::num);
+crolol::num operator<(crolol::num, crolol::num);
+crolol::num operator<=(crolol::num, crolol::num);
+crolol::num operator>(crolol::num, crolol::num);
+crolol::num operator>=(crolol::num, crolol::num);
+crolol::num operator&&(crolol::num, crolol::num);
+crolol::num operator||(crolol::num, crolol::num);
 // Prefix/suffix inc/dec.
-crolol::num& operator++(crolol::num& n);
-crolol::num& operator--(crolol::num& n);
-crolol::num operator++(crolol::num& n, int);
-crolol::num operator--(crolol::num& n, int);
+crolol::num& operator++(crolol::num&);
+crolol::num& operator--(crolol::num&);
+crolol::num operator++(crolol::num&, int);
+crolol::num operator--(crolol::num&, int);
 
 class crolol::num {
-	using bigint = mpz_class;
-	
 	public:
-		num(const bigint& bi);
-		num(bigint&& bi);
-		num(const bool b);
+		num(std::int64_t) noexcept;
+		explicit num(bool) noexcept;
 		
 		explicit operator std::string() const;
-		explicit operator long() const;
-		explicit operator unsigned long() const;
+		explicit operator std::int64_t() const;
 		explicit operator double() const;
 		explicit operator bool() const;
 		
 		// In order: addition, subtraction, multiplication, division,
 		// and modulo.
-		crolol::num& operator+=(const crolol::num&);
-		crolol::num& operator-=(const crolol::num&);
-		crolol::num& operator*=(const crolol::num&);
-		crolol::num& operator/=(const crolol::num&);
-		crolol::num& operator%=(const crolol::num&);
+		crolol::num& operator+=(crolol::num);
+		crolol::num& operator-=(crolol::num);
+		crolol::num& operator*=(crolol::num);
+		crolol::num& operator/=(crolol::num);
+		crolol::num& operator%=(crolol::num);
 		
-		num(const num&) = default;
-		num(num&&) = default;
-		num& operator=(const num&) = default;
-		num& operator=(num&&) = default;
-		~num() = default;
+		constexpr num(const num&) noexcept = default;
+		constexpr num(num&&) noexcept = default;
+		num& operator=(const num&) noexcept = default;
+		num& operator=(num&&) noexcept = default;
+		~num() noexcept = default;
 		
 		const static num min;
 		const static num max;
 		const static num truthy;
 		const static num falsy;
 		
-		friend num (::operator+)(num lhs, const num& rhs);
-		friend num (::operator-)(num lhs, const num& rhs);
-		friend num (::operator*)(num lhs, const num& rhs);
-		friend num (::operator/)(num lhs, const num& rhs);
-		friend num (::operator%)(num lhs, const num& rhs);
-		friend num (::operator^)(const num& lhs, const num& rhs);
-		friend num (::operator-)(const num& n);
-		friend num (::operator!)(const num& n);
-		friend num (::operator==)(const num& lhs, const num& rhs);
-		friend num (::operator<)(const num&, const num&);
-		friend num (::operator>)(const num&, const num&);
-		friend num& (::operator++)(num& n);
-		friend num& (::operator--)(num& n);
-		friend num (::operator++)(num& n, int);
-		friend num (::operator--)(num& n, int);
+		friend num (::operator+)(num, num);
+		friend num (::operator-)(num, num);
+		friend num (::operator*)(num, num);
+		friend num (::operator/)(num, num);
+		friend num (::operator%)(num, num);
+		friend num (::operator^)(num, num);
+		friend num (::operator-)(num);
+		friend num (::operator!)(num);
+		friend num (::operator==)(num, num);
+		friend num (::operator<)(num, num);
+		friend num (::operator>)(num, num);
 		
-		friend bool equals(const num& lhs, const num& rhs);
-		friend bool lessthan(const num& lhs, const num& rhs);
-		friend bool lessequals(const num& lhs, const num& rhs);
+		friend bool equals(num, num);
+		friend bool lessthan(num, num);
+		friend bool lessequals(num, num);
+		
+		std::int64_t getraw() const noexcept;
 		
 	private:
-		num(const bigint& bi, int);
-		
-		bigint bi = 0;
+		std::int64_t bi = 0;
 };
 
 #endif

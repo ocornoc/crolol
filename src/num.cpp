@@ -1,48 +1,57 @@
 #include <cfenv>
 #include <cmath>
+#include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <stdexcept>
 #include <string>
 #include <utility>
-#include <gmp.h>
-#include <gmpxx.h>
 #include "num.h"
 
 #pragma STDC FENV_ACCESS on
 
 using namespace crolol;
-using bigint = mpz_class;
 
-using l_lims = std::numeric_limits<long>;
+using bigint = std::int64_t;
+using std::int64_t;
+using l_lims = std::numeric_limits<bigint>;
 
-constexpr static long scale = 10000;
-constexpr static long num_min = l_lims::lowest();
-constexpr static long num_max = l_lims::max();
-constexpr static long num_truthy = 1L * scale;
-constexpr static long num_falsy = 0L * scale;
+constexpr static bigint scale = 10000;
+constexpr static bigint num_min = l_lims::lowest();
+constexpr static bigint num_max = l_lims::max();
+constexpr static bigint num_truthy = 1L * scale;
+constexpr static bigint num_falsy = 0L * scale;
 
-static bigint clamp(const bigint& bi)
+constexpr static int64_t rawclamp(int64_t left, int64_t mid, int64_t right)
+	noexcept
 {
-	if (bi > num_max) return num_max;
-	else if (bi < num_min) return num_min;
-	else return bi;
+	return mid < left ? left : (mid > right ? right : mid);
 }
 
-num::num(const bigint& bi)
-	: bi(clamp(bi * scale))
+constexpr static int64_t preclamp(int64_t bi) noexcept
+{
+	return rawclamp(num_min / scale, bi, num_max / scale);
+}
+
+num::num(int64_t bi) noexcept
+	: bi(bi)
 {}
 
-num::num(bigint&& bi)
-	: bi(std::forward<bigint>(clamp(bi * scale)))
-{}
-
-num::num(const bool b)
+num::num(bool b) noexcept
 	: bi(b ? num_truthy : num_falsy)
 {}
 
-num::num(const bigint& bi, int)
-	: bi(bi)
-{}
+num crolol::make_numi(int64_t bi) noexcept
+{
+	if (preclamp(bi) != bi)
+		return bi < 0 ? num_min : num_max;
+	else return bi * scale;
+}
+
+num crolol::make_numf(long double bf) noexcept
+{
+	return std::llrint(bf * scale);
+}
 
 const num num::min = num_min;
 const num num::max = num_max;
@@ -51,7 +60,7 @@ const num num::falsy = num_falsy;
 
 num::operator double() const
 {
-	return static_cast<bigint>(bi).get_d() / scale;
+	return static_cast<double>(bi) / scale;
 }
 
 num::operator std::string() const
@@ -59,118 +68,132 @@ num::operator std::string() const
 	return std::to_string(static_cast<double>(*this));
 }
 
-num::operator long() const
+num::operator int64_t() const
 {
-	return static_cast<double>(*this);
-}
-
-num::operator unsigned long() const
-{
-	return static_cast<double>(*this);
+	return bi / scale;
 }
 
 num::operator bool() const
 {
-	return bi != num_falsy;
+	return bi;
 }
 
-num& num::operator+=(const num& rhs)
+num& num::operator+=(num rhs)
 {
-	bi = clamp(bi + rhs.bi);
+	// If the sign of lhs and rhs aren't the same, we can always add.
+	// Same if either args are 0.
+	if (std::signbit(bi) != std::signbit(rhs.bi) or bi == 0 or rhs.bi == 0)
+		bi += rhs.bi;
+	else if (std::signbit(bi)) {
+		if (num_min - bi > rhs.bi)
+			bi = num_min;
+		else bi += rhs.bi;
+	} else {
+		if (num_max - bi < rhs.bi)
+			bi = num_max;
+		else bi += rhs.bi;
+	}
 	
 	return *this;
 }
 
-num& num::operator-=(const num& rhs)
+num& num::operator-=(num rhs)
 {
-	bi = clamp(bi - rhs.bi);
+	// If sgn(lhs) == sgn(rhs) or rhs or lhs == 0, we can subtract.
+	if ((std::signbit(bi) == std::signbit(rhs.bi)) or
+		rhs.bi == 0 or bi == 0)
+		bi -= rhs.bi;
+	// -rhs is undefined iff rhs == num_min.
+	else if (rhs != num_min) *this += -rhs.bi;
+	// At this stage, lhs < 0 and rhs == num_min, which will underflow.
+	else bi = num_min;
+	
+	return *this;
+}
+/*
+num& num::operator*=(num rhs)
+{
+	//bi = clamp((bi * rhs.bi) / (scale * scale));
 	
 	return *this;
 }
 
-num& num::operator*=(const num& rhs)
+num& num::operator/=(num rhs)
 {
-	bi = clamp((bi * rhs.bi) / (scale * scale));
+	//bi = clamp((bi * scale) / (rhs.bi * scale));
 	
 	return *this;
 }
 
-num& num::operator/=(const num& rhs)
+num& num::operator%=(num rhs)
 {
-	bi = clamp((bi * scale) / (rhs.bi * scale));
+	//int sgn = mpz_sgn(rhs.bi.get_mpz_t());
+	//bi = clamp(bi % rhs.bi * sgn);
 	
 	return *this;
 }
-
-num& num::operator%=(const num& rhs)
-{
-	int sgn = mpz_sgn(rhs.bi.get_mpz_t());
-	bi = clamp(bi % rhs.bi * sgn);
-	
-	return *this;
-}
-
-num operator+(num lhs, const num& rhs)
+*/
+num operator+(num lhs, num rhs)
 {
 	return lhs += rhs;
 }
 
-num operator-(num lhs, const num& rhs)
+num operator-(num lhs, num rhs)
 {
 	return lhs -= rhs;
 }
-
-num operator*(num lhs, const num& rhs)
+/*
+num operator*(num lhs, num rhs)
 {
 	return lhs *= rhs;
 }
 
-num operator/(num lhs, const num& rhs)
+num operator/(num lhs, num rhs)
 {
 	return lhs /= rhs;
 }
 
-num operator%(num lhs, const num& rhs)
+num operator%(num lhs, num rhs)
 {
 	return lhs %= rhs;
 }
-
-num operator!(const num& n)
+*/
+num operator!(num n)
 {
 	return n.bi == num_falsy ? num::truthy : num::falsy;
 }
 
-num operator==(const num& lhs, const num& rhs)
+num operator==(num lhs, num rhs)
 {
 	return lhs.bi == rhs.bi;
 }
 
-num operator!=(const num& lhs, const num& rhs)
+num operator!=(num lhs, num rhs)
 {
 	return !(lhs == rhs);
 }
 
-num operator<(const num& lhs, const num& rhs)
+num operator<(num lhs, num rhs)
 {
 	return lhs.bi < rhs.bi;
 }
 
-num operator>(const num& lhs, const num& rhs)
+num operator>(num lhs, num rhs)
 {
 	return lhs.bi > rhs.bi;
 }
 
-num operator>=(const num& lhs, const num& rhs)
+num operator>=(num lhs, num rhs)
 {
 	return !(lhs < rhs);
 }
 
-num operator<=(const num& lhs, const num& rhs)
+num operator<=(num lhs, num rhs)
 {
 	return !(lhs > rhs);
 }
-
-num crolol::abs(const num& n)
+/*
+num crolol::abs(num n)
 {
 	return n * (2*(n < 0) - 1);
 }
@@ -204,25 +227,21 @@ num operator^(const num& lhs, const num& rhs)
 	}
 	
 	return clamp(out_bi);
-}
+}*/
 
-num operator-(const num& n)
+num operator-(num n)
 {
-	return static_cast<bigint>(-n.bi);
+	return 0 - n;
 }
 
 num& operator++(num& n)
 {
-	++n.bi;
-	
-	return n;
+	return n += 1;
 }
 
 num& operator--(num& n)
 {
-	--n.bi;
-	
-	return n;
+	return n -= 1;
 }
 
 num operator++(num& n, int)
@@ -241,17 +260,22 @@ num operator--(num& n, int)
 	return nn;
 }
 
-bool crolol::equals(const num& lhs, const num& rhs)
+bool crolol::equals(num lhs, num rhs)
 {
 	return lhs.bi == rhs.bi;
 }
 
-bool crolol::lessthan(const num& lhs, const num& rhs)
+bool crolol::lessthan(num lhs, num rhs)
 {
 	return lhs.bi < rhs.bi;
 }
 
-bool crolol::lessequals(const num& lhs, const num& rhs)
+bool crolol::lessequals(num lhs, num rhs)
 {
 	return lhs.bi <= rhs.bi;
+}
+
+int64_t num::getraw() const noexcept
+{
+	return bi;
 }
