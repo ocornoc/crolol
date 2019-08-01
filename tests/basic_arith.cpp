@@ -96,18 +96,18 @@ bool add_test()
 }
 
 const static std::vector<argans> sub_args = {
-/*	make_argans(make_args(0, 0), 0),
+	make_argans(make_args(0, 0), 0),
 	make_argans(make_args(1, 1), 0),
 	make_argans(make_args(1, 2), -1),
-	make_argans(make_args(2, 1), 1),*/
+	make_argans(make_args(2, 1), 1),
 	make_argans(make_args(5, 3), 2),
 	make_argans(make_args(-5, 3), -8),
 	make_argans(make_args(5, -3), 8),
 	make_argans(make_args(-5, -3), -2),
-/*	make_argansf(make_argsf(5.2, 3.1), 2.1),
+	make_argansf(make_argsf(5.2, 3.1), 2.1),
 	make_argansf(make_argsf(-5.2, 3.1), -8.3),
 	make_argansf(make_argsf(5.2, -3.1), 8.3),
-	make_argansf(make_argsf(-5.2, -3.1), -2.1),*/
+	make_argansf(make_argsf(-5.2, -3.1), -2.1),
 	make_argans(make_args(min, 1), min),
 	make_argans(make_args(max, -1), max),
 };
