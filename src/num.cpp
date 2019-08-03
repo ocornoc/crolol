@@ -54,6 +54,26 @@ num crolol::make_numf(long double bf) noexcept
 	return std::llrint(bf * scale);
 }
 
+bool crolol::equals(num lhs, num rhs)
+{
+	return lhs.bi == rhs.bi;
+}
+
+bool crolol::lessthan(num lhs, num rhs)
+{
+	return lhs.bi < rhs.bi;
+}
+
+bool crolol::lessequals(num lhs, num rhs)
+{
+	return lhs.bi <= rhs.bi;
+}
+
+int64_t num::getraw() const noexcept
+{
+	return bi;
+}
+
 const num num::min = num_min;
 const num num::max = num_max;
 const num num::truthy = num_truthy;
@@ -328,22 +348,7 @@ num operator--(num& n, int)
 	return nn;
 }
 
-bool crolol::equals(num lhs, num rhs)
+num crolol::abs(num n)
 {
-	return lhs.bi == rhs.bi;
-}
-
-bool crolol::lessthan(num lhs, num rhs)
-{
-	return lhs.bi < rhs.bi;
-}
-
-bool crolol::lessequals(num lhs, num rhs)
-{
-	return lhs.bi <= rhs.bi;
-}
-
-int64_t num::getraw() const noexcept
-{
-	return bi;
+	return n.getraw() < 0 ? -n : n;
 }
