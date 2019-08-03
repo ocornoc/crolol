@@ -121,13 +121,12 @@ num& num::operator+=(num rhs)
 num& num::operator-=(num rhs)
 {
 	// If sgn(lhs) == sgn(rhs) or rhs or lhs == 0, we can subtract.
+	// EXCEPT if rhs == num_min, as that would allow 0-(-2^63)=2^63.
 	if ((std::signbit(bi) == std::signbit(rhs.bi)) or
-		rhs.bi == 0 or bi == 0)
+		((rhs.bi == 0 or bi == 0) and rhs.bi != num_min))
 		bi -= rhs.bi;
-	// -rhs is undefined iff rhs == num_min.
-	else if (rhs != num_min) *this += -rhs.bi;
-	// At this stage, lhs < 0 and rhs == num_min, which will underflow.
-	else bi = num_min;
+	else if (rhs.bi == num_min) *this += num::max;
+	else *this += -rhs.bi;
 	
 	return *this;
 }
