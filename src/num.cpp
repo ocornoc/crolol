@@ -1,3 +1,5 @@
+#include <array>
+#include <bitset>
 #include <cfenv>
 #include <cmath>
 #include <cstdint>
@@ -11,7 +13,6 @@
 #pragma STDC FENV_ACCESS on
 
 using namespace crolol;
-
 using bigint = std::int64_t;
 using std::int64_t;
 using l_lims = std::numeric_limits<bigint>;
@@ -110,14 +111,81 @@ num& num::operator-=(num rhs)
 	
 	return *this;
 }
-/*
+
 num& num::operator*=(num rhs)
 {
-	//bi = clamp((bi * rhs.bi) / (scale * scale));
+	bool special = false;
+	if (bi == 0 * scale or rhs.bi == 0 * scale) {
+		bi = 0 * scale;
+		special = true;
+	} else if (bi == 1 * scale) {
+		bi = rhs.bi;
+		special = true;
+	} else if (rhs.bi == 1 * scale) return *this;
+	else if (bi == -1 * scale) {
+		*this = -rhs;
+		special = true;
+	} else if (rhs.bi == -1 * scale) {
+		*this = -*this;
+		special = true;
+	}
+	if (special) return *this;
+	
+	const bool lbisgn = std::signbit(bi);
+	const bool rbisgn = std::signbit(rhs.bi);
+	// Determines if we negate the result at the end.
+	const bool negate = lbisgn != rbisgn;
+	int64_t smaller_orig;
+	int64_t bigger_orig;
+	
+	if (abs(*this).bi < abs(rhs).bi) {
+		smaller_orig = bi;
+		bigger_orig = rhs.bi;
+	} else {
+		smaller_orig = rhs.bi;
+		bigger_orig = bi;
+	}
+	
+	const int64_t smaller = abs(smaller_orig).bi;
+	const int64_t bigger = abs(bigger_orig).bi;
+	
+	// We know lhs and rhs != 0, 1, -1. Thus, if abs(lhs) >= num_max,
+	// lhs * rhs will over/underflow, and vice-versa. abs(lhs) clamps to
+	// num_max even if lhs == num_min.
+	if (bigger == num_max and smaller >= 1 * scale) {
+		bi = bigger_orig;
+		*this = negate ? -*this : *this;
+	// Check if the result /should/ over/underflow.
+	} else if (std::log2(bigger) + std::log2(smaller)
+		- 2 * std::log2(scale) >= 63)
+		bi = negate ? num_min : num_max;
+	else {
+		const std::bitset<63> smallbits = smaller;
+		num acc = 0;
+		std::array<std::bitset<smallbits.size()>, smallbits.size()> arr =
+			{bigger * smallbits.test(0)};
+		
+		for (std::size_t i = 1; i < arr.size(); i++) {
+			if (smallbits.test(i)) {
+				if (arr[i - 1].test(arr[i - 1].size() - 1))
+					arr[i] = num_max;
+				else {
+					arr[i] = bigger;
+					arr[i] <<= i;
+				}
+			}
+		}
+		
+		for (const auto& bs: arr)
+			acc += static_cast<int64_t>(bs.to_ullong());
+		
+		*this = negate ? -acc : acc;
+		bi /= scale;
+	}
 	
 	return *this;
 }
-
+/*
 num& num::operator/=(num rhs)
 {
 	//bi = clamp((bi * scale) / (rhs.bi * scale));
@@ -142,12 +210,12 @@ num operator-(num lhs, num rhs)
 {
 	return lhs -= rhs;
 }
-/*
+
 num operator*(num lhs, num rhs)
 {
 	return lhs *= rhs;
 }
-
+/*
 num operator/(num lhs, num rhs)
 {
 	return lhs /= rhs;

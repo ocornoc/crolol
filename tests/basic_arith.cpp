@@ -40,9 +40,14 @@ args make_argsf(long double n, long double m)
 		crolol::make_numf(m));
 }
 
+argans make_argansn(const args& a, const crolol::num& b)
+{
+	return std::make_pair(a, b);
+}
+
 argans make_argans(const args& a, int64_t b)
 {
-	return std::make_pair(a, crolol::make_numi(b));
+	return make_argansn(a, crolol::make_numi(b));
 }
 
 argans make_argansf(const args& a, long double m)
@@ -140,12 +145,60 @@ bool sub_test()
 	return success;
 }
 
+const static std::vector<argans> mul_args = {
+	make_argans(make_args(0, 0), 0),
+	make_argans(make_args(1, 1), 1),
+	make_argans(make_args(1, 2), 2),
+	make_argans(make_args(2, 1), 2),
+	make_argans(make_args(5, 3), 15),
+	make_argans(make_args(-5, 3), -15),
+	make_argans(make_args(5, -3), -15),
+	make_argans(make_args(-5, -3), 15),
+	make_argansf(make_argsf(5.2, 3.1), 16.12),
+	make_argansf(make_argsf(-5.2, 3.1), -16.12),
+	make_argansf(make_argsf(5.2, -3.1), -16.12),
+	make_argansf(make_argsf(-5.2, -3.1), 16.12),
+	make_argans(make_args(min, 1), min),
+	make_argans(make_args(min, -1), max),
+	make_argans(make_args(max, 1), max),
+	make_argansn(make_args(max, -1), -max),
+};
+
+bool mul_test()
+{
+	bool success = true;
+	
+	for (const argans& arg_and_ans: mul_args) {
+		const crolol::num lhs = arg_and_ans.first.first;
+		const crolol::num rhs = arg_and_ans.first.second;
+		const crolol::num ans = arg_and_ans.second;
+		const crolol::num result = lhs * rhs;
+		
+		if (not crolol::equals(ans, result)) {
+			success = false;
+			
+			std::cout << static_cast<std::string>(lhs) << " * "
+				<< static_cast<std::string>(rhs)
+				<< " should be "
+				<< static_cast<std::string>(ans) << ", was "
+				<< static_cast<std::string>(result)
+				<< std::endl;
+		}
+	}
+	
+	std::cout << "Multiplication: ";
+	report(success);
+	
+	return success;
+}
+
 int main()
 {
 	bool success = true;
 	
 	success &= add_test();
 	success &= sub_test();
+	success &= mul_test();
 	
 	return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }
