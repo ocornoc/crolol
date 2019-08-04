@@ -17,9 +17,9 @@ namespace crolol {
 	num sin(num);
 	num cos(num);
 	num tan(num);
-	num arcsin(num);
-	num arccos(num);
-	num arctan(num);
+	num asin(num);
+	num acos(num);
+	num atan(num);
 	
 	num make_numi(std::int64_t i) noexcept;
 	num make_numf(long double ld) noexcept;
