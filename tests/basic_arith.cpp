@@ -192,6 +192,97 @@ bool mul_test()
 	return success;
 }
 
+const static std::vector<argans> div_args = {
+	make_argans(make_args(1, 1), 1),
+	make_argansf(make_args(1, 2), 0.5),
+	make_argans(make_args(2, 1), 2),
+	make_argansf(make_args(5, 3), 1.6666),
+	make_argansf(make_args(-5, 3), -1.6666),
+	make_argansf(make_args(5, -3), -1.6666),
+	make_argansf(make_args(-5, -3), 1.6666),
+	make_argansf(make_argsf(5.2, 3.1), 1.6774),
+	make_argansf(make_argsf(-5.2, 3.1), -1.6774),
+	make_argansf(make_argsf(5.2, -3.1), -1.6774),
+	make_argansf(make_argsf(-5.2, -3.1), 1.6774),
+	make_argans(make_args(min, 1), min),
+	make_argans(make_args(min, -1), max),
+	make_argans(make_args(max, 1), max),
+	make_argansn(make_args(max, -1), -max),
+};
+
+bool div_test()
+{
+	bool success = true;
+	
+	for (const argans& arg_and_ans: div_args) {
+		const crolol::num lhs = arg_and_ans.first.first;
+		const crolol::num rhs = arg_and_ans.first.second;
+		const crolol::num ans = arg_and_ans.second;
+		const crolol::num result = lhs / rhs;
+		
+		if (not crolol::equals(ans, result)) {
+			success = false;
+			
+			std::cout << static_cast<std::string>(lhs) << " / "
+				<< static_cast<std::string>(rhs)
+				<< " should be "
+				<< static_cast<std::string>(ans) << ", was "
+				<< static_cast<std::string>(result)
+				<< std::endl;
+		}
+	}
+	
+	std::cout << "Division: ";
+	report(success);
+	
+	return success;
+}
+
+const static std::vector<argans> pow_args = {
+	make_argans(make_args(1, 1), 1),
+	make_argans(make_args(1, 2), 1),
+	make_argans(make_args(2, 1), 2),
+	make_argans(make_args(5, 3), 125),
+	make_argans(make_args(-5, 3), -125),
+	make_argansf(make_args(5, -3), 0.008),
+	make_argansf(make_args(-5, -3), -0.008),
+	make_argansf(make_argsf(5.2, 3.1), 165.8098),
+	make_argansf(make_argsf(-5.2, 3.1), -165.8098),
+	make_argansf(make_argsf(5.2, -3.1), 0.006),
+	make_argans(make_args(min, 1), min),
+	make_argans(make_args(min, -1), 0),
+	make_argans(make_args(max, 1), max),
+	make_argans(make_args(max, -1), 0),
+};
+
+bool pow_test()
+{
+	bool success = true;
+	
+	for (const argans& arg_and_ans: pow_args) {
+		const crolol::num lhs = arg_and_ans.first.first;
+		const crolol::num rhs = arg_and_ans.first.second;
+		const crolol::num ans = arg_and_ans.second;
+		const crolol::num result = lhs ^ rhs;
+		
+		if (not crolol::equals(ans, result)) {
+			success = false;
+			
+			std::cout << static_cast<std::string>(lhs) << " ^ "
+				<< static_cast<std::string>(rhs)
+				<< " should be "
+				<< static_cast<std::string>(ans) << ", was "
+				<< static_cast<std::string>(result)
+				<< std::endl;
+		}
+	}
+	
+	std::cout << "Power: ";
+	report(success);
+	
+	return success;
+}
+
 int main()
 {
 	bool success = true;
@@ -199,6 +290,8 @@ int main()
 	success &= add_test();
 	success &= sub_test();
 	success &= mul_test();
+	success &= div_test();
+	success &= pow_test();
 	
 	return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }
