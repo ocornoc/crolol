@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include "losslessops.h"
 #include "num.h"
 
 #pragma STDC FENV_ACCESS on
@@ -133,93 +134,39 @@ num& num::operator-=(num rhs)
 
 num& num::operator*=(num rhs)
 {
-	bool special = false;
-	if (bi == 0 * scale or rhs.bi == 0 * scale) {
-		bi = 0 * scale;
-		special = true;
-	} else if (bi == 1 * scale) {
-		bi = rhs.bi;
-		special = true;
-	} else if (rhs.bi == 1 * scale) return *this;
-	else if (bi == -1 * scale) {
-		*this = -rhs;
-		special = true;
-	} else if (rhs.bi == -1 * scale) {
-		*this = -*this;
-		special = true;
+	const backend::saferet result = backend::multiply(bi, rhs.bi);
+	
+	switch (result.flow) {
+		case backend::badarg: throw std::invalid_argument("Bad mult");
+		case backend::underflow: *this = num::min; return *this;
+		case backend::overflow: *this = num::max; return *this;
+		default: *this = result.val; return *this;
 	}
-	if (special) return *this;
-	
-	const bool lbisgn = std::signbit(bi);
-	const bool rbisgn = std::signbit(rhs.bi);
-	// Determines if we negate the result at the end.
-	const bool negate = lbisgn != rbisgn;
-	int64_t smaller_orig;
-	int64_t bigger_orig;
-	
-	if (abs(*this).bi < abs(rhs).bi) {
-		smaller_orig = bi;
-		bigger_orig = rhs.bi;
-	} else {
-		smaller_orig = rhs.bi;
-		bigger_orig = bi;
-	}
-	
-	const int64_t smaller = abs(smaller_orig).bi;
-	const int64_t bigger = abs(bigger_orig).bi;
-	
-	// We know lhs and rhs != 0, 1, -1. Thus, if abs(lhs) >= num_max,
-	// lhs * rhs will over/underflow, and vice-versa. abs(lhs) clamps to
-	// num_max even if lhs == num_min.
-	if (bigger == num_max and smaller >= 1 * scale) {
-		bi = bigger_orig;
-		*this = negate ? -*this : *this;
-	// Check if the result /should/ over/underflow.
-	} else if (std::log2(bigger) + std::log2(smaller)
-		- 2 * std::log2(scale) >= 63)
-		bi = negate ? num_min : num_max;
-	else {
-		const std::bitset<63> smallbits = smaller;
-		num acc = 0;
-		std::array<std::bitset<smallbits.size()>, smallbits.size()> arr =
-			{bigger * smallbits.test(0)};
-		
-		for (std::size_t i = 1; i < arr.size(); i++) {
-			if (smallbits.test(i)) {
-				if (arr[i - 1].test(arr[i - 1].size() - 1))
-					arr[i] = num_max;
-				else {
-					arr[i] = bigger;
-					arr[i] <<= i;
-				}
-			}
-		}
-		
-		for (const auto& bs: arr)
-			acc += static_cast<int64_t>(bs.to_ullong());
-		
-		*this = negate ? -acc : acc;
-		bi /= scale;
-	}
-	
-	return *this;
 }
-/*
+
 num& num::operator/=(num rhs)
 {
-	//bi = clamp((bi * scale) / (rhs.bi * scale));
+	const backend::saferet result = backend::divide(bi, rhs.bi);
 	
-	return *this;
+	switch (result.flow) {
+		case backend::badarg: throw std::invalid_argument("Bad div");
+		case backend::underflow: *this = num::min; return *this;
+		case backend::overflow: *this = num::max; return *this;
+		default: *this = result.val; return *this;
+	}
 }
 
 num& num::operator%=(num rhs)
 {
-	//int sgn = mpz_sgn(rhs.bi.get_mpz_t());
-	//bi = clamp(bi % rhs.bi * sgn);
+	const bool sign = std::signbit(rhs.bi);
+	
+	bi = abs(*this).bi % abs(rhs).bi;
+	
+	if (sign) *this = -*this;
 	
 	return *this;
 }
-*/
+
 num operator+(num lhs, num rhs)
 {
 	return lhs += rhs;
@@ -234,7 +181,7 @@ num operator*(num lhs, num rhs)
 {
 	return lhs *= rhs;
 }
-/*
+
 num operator/(num lhs, num rhs)
 {
 	return lhs /= rhs;
@@ -244,7 +191,20 @@ num operator%(num lhs, num rhs)
 {
 	return lhs %= rhs;
 }
-*/
+
+num operator^(num lhs, num rhs)
+{
+	const backend::saferet result = backend::pow(lhs.bi, rhs.bi);
+	int64_t newv;
+	
+	switch (result.flow) {
+		case backend::badarg: throw std::invalid_argument("Bad pow");
+		case backend::underflow: newv = num_min; return newv;
+		case backend::overflow: newv = num_max; return newv;
+		default: newv = result.val; return newv;
+	}
+}
+
 num operator!(num n)
 {
 	return n.bi == num_falsy ? num::truthy : num::falsy;
@@ -279,42 +239,16 @@ num operator<=(num lhs, num rhs)
 {
 	return !(lhs > rhs);
 }
-/*
-num crolol::abs(num n)
+
+num operator&&(num lhs, num rhs)
 {
-	return n * (2*(n < 0) - 1);
+	return lhs.getraw() and rhs.getraw();
 }
 
-num operator^(const num& lhs, const num& rhs)
+num operator||(num lhs, num rhs)
 {
-	std::feclearexcept(FE_ALL_EXCEPT);
-	const double approx_lhs = static_cast<double>(lhs) / scale;
-	const double approx_rhs = static_cast<double>(rhs) / scale;
-	const double approx_pow = std::pow(approx_lhs, approx_rhs);
-	
-	const int fes = std::fetestexcept(FE_ALL_EXCEPT);
-	if (fes & FE_DIVBYZERO)
-		throw std::invalid_argument("Division by zero");
-	else if (fes & FE_INVALID)
-		throw std::invalid_argument("Invalid arguments");
-	else if (fes & FE_OVERFLOW or approx_pow >= num_max)
-		return num::max;
-	else if (fes & FE_UNDERFLOW or approx_pow <= num_min)
-		return num::min;
-	
-	const unsigned long exp = static_cast<unsigned long>(abs(rhs) / scale);
-	bigint out_bi;
-	mpz_pow_ui(out_bi.get_mpz_t(), lhs.bi.get_mpz_t(), exp);
-	bigint scale_bi;
-	mpz_pow_ui(scale_bi.get_mpz_t(), static_cast<bigint>(scale).get_mpz_t(), exp - 1);
-	out_bi /= scale_bi;
-	
-	if (abs(rhs) != rhs) {
-		out_bi = (scale * scale) / out_bi;
-	}
-	
-	return clamp(out_bi);
-}*/
+	return lhs.getraw() or rhs.getraw();
+}
 
 num operator-(num n)
 {
@@ -350,4 +284,9 @@ num operator--(num& n, int)
 num crolol::abs(num n)
 {
 	return n.getraw() < 0 ? -n : n;
+}
+
+num crolol::sqrt(num n)
+{
+	return n ^ (0.5 * scale);
 }
