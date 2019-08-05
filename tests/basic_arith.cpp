@@ -82,7 +82,7 @@ bool add_test()
 		const crolol::num ans = arg_and_ans.second;
 		const crolol::num result = lhs + rhs;
 		
-		if (not crolol::equals(ans, result)) {
+		if (!crolol::equals(ans, result)) {
 			success = false;
 			
 			std::cout << static_cast<std::string>(lhs) << " + "
@@ -127,7 +127,7 @@ bool sub_test()
 		const crolol::num ans = arg_and_ans.second;
 		const crolol::num result = lhs - rhs;
 		
-		if (not crolol::equals(ans, result)) {
+		if (!crolol::equals(ans, result)) {
 			success = false;
 			
 			std::cout << static_cast<std::string>(lhs) << " - "
@@ -174,7 +174,7 @@ bool mul_test()
 		const crolol::num ans = arg_and_ans.second;
 		const crolol::num result = lhs * rhs;
 		
-		if (not crolol::equals(ans, result)) {
+		if (!crolol::equals(ans, result)) {
 			success = false;
 			
 			std::cout << static_cast<std::string>(lhs) << " * "
@@ -220,7 +220,7 @@ bool div_test()
 		const crolol::num ans = arg_and_ans.second;
 		const crolol::num result = lhs / rhs;
 		
-		if (not crolol::equals(ans, result)) {
+		if (!crolol::equals(ans, result)) {
 			success = false;
 			
 			std::cout << static_cast<std::string>(lhs) << " / "
@@ -265,7 +265,7 @@ bool pow_test()
 		const crolol::num ans = arg_and_ans.second;
 		const crolol::num result = lhs ^ rhs;
 		
-		if (not crolol::equals(ans, result)) {
+		if (!crolol::equals(ans, result)) {
 			success = false;
 			
 			std::cout << static_cast<std::string>(lhs) << " ^ "

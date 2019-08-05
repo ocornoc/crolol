@@ -24,7 +24,7 @@ int main()
 	for (const crolol::num& should_be: should_bes) {
 		const crolol::num ans = prng();
 		
-		if (not crolol::equals(should_be, ans)) {
+		if (!crolol::equals(should_be, ans)) {
 			std::cout << static_cast<std::string>(ans)
 				<< " should have been "
 				<< static_cast<std::string>(should_be)
