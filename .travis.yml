@@ -16,5 +16,15 @@ matrix:
   - compiler: gcc
     os: osx
 
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - libboost-dev
+  homebrew:
+    packages:
+    - boost
+
 script:
   - make -j debug
