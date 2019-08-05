@@ -87,13 +87,13 @@ static int64_t sqrt(int64_t n)
 
 saferet backend::pow(int64_t n, int64_t m)
 {
-	if (n < 0 and m % scale != 0) return make_badarg(m);
-	else if (n == 0 and m <= 0) return make_badarg(m);
-	else if (n == scale or m == 0) return clamp(scale);
+	if (n < 0 && m % scale != 0) return make_badarg(m);
+	else if (n == 0 && m <= 0) return make_badarg(m);
+	else if (n == scale || m == 0) return clamp(scale);
 	else if (m == scale) return clamp(n);
 	else if (m < 0) {
 		const saferet result = pow(n, -m);
-		if (result.flow == overflow or result.flow == underflow)
+		if (result.flow == overflow || result.flow == underflow)
 			return clamp(0);
 		else if (result.flow == badarg) return result;
 		

@@ -104,9 +104,9 @@ num& num::operator+=(num rhs)
 {
 	// If the sign of lhs and rhs aren't the same, we can always add.
 	// Same if either args are 0.
-	if (std::signbit(bi) != std::signbit(rhs.bi) or bi == 0 or rhs.bi == 0)
+	if ((bi < 0) != (rhs.bi < 0) || bi == 0 || rhs.bi == 0)
 		bi += rhs.bi;
-	else if (std::signbit(bi)) {
+	else if (bi < 0) {
 		if (num_min - bi > rhs.bi)
 			bi = num_min;
 		else bi += rhs.bi;
@@ -123,8 +123,8 @@ num& num::operator-=(num rhs)
 {
 	// If sgn(lhs) == sgn(rhs) or rhs or lhs == 0, we can subtract.
 	// EXCEPT if rhs == num_min, as that would allow 0-(-2^63)=2^63.
-	if ((std::signbit(bi) == std::signbit(rhs.bi)) or
-		((rhs.bi == 0 or bi == 0) and rhs.bi != num_min))
+	if (((bi < 0) == (rhs.bi < 0)) ||
+		((rhs.bi == 0 || bi == 0) && rhs.bi != num_min))
 		bi -= rhs.bi;
 	else if (rhs.bi == num_min) *this += num::max;
 	else *this += -rhs.bi;
@@ -158,7 +158,7 @@ num& num::operator/=(num rhs)
 
 num& num::operator%=(num rhs)
 {
-	const bool sign = std::signbit(rhs.bi);
+	const bool sign = rhs.bi < 0;
 	
 	bi = abs(*this).bi % abs(rhs).bi;
 	
@@ -242,12 +242,12 @@ num operator<=(num lhs, num rhs)
 
 num operator&&(num lhs, num rhs)
 {
-	return lhs.getraw() and rhs.getraw();
+	return lhs.getraw() && rhs.getraw();
 }
 
 num operator||(num lhs, num rhs)
 {
-	return lhs.getraw() or rhs.getraw();
+	return lhs.getraw() || rhs.getraw();
 }
 
 num operator-(num n)
