@@ -104,7 +104,7 @@ num& num::operator+=(num rhs)
 {
 	// If the sign of lhs and rhs aren't the same, we can always add.
 	// Same if either args are 0.
-	if (bi < 0 != rhs.bi < 0 || bi == 0 || rhs.bi == 0)
+	if ((bi < 0) != (rhs.bi < 0) || bi == 0 || rhs.bi == 0)
 		bi += rhs.bi;
 	else if (bi < 0) {
 		if (num_min - bi > rhs.bi)
@@ -123,7 +123,7 @@ num& num::operator-=(num rhs)
 {
 	// If sgn(lhs) == sgn(rhs) or rhs or lhs == 0, we can subtract.
 	// EXCEPT if rhs == num_min, as that would allow 0-(-2^63)=2^63.
-	if ((bi < 0 == rhs.bi < 0) ||
+	if (((bi < 0) == (rhs.bi < 0)) ||
 		((rhs.bi == 0 || bi == 0) && rhs.bi != num_min))
 		bi -= rhs.bi;
 	else if (rhs.bi == num_min) *this += num::max;
