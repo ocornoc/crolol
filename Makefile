@@ -1,6 +1,6 @@
 WARNS = -Wall -Wextra -Wpedantic -Wno-unknown-pragmas
 VERSION = -std=c++11
-OPTLEVEL = -O3 -flto
+OPTLEVEL = -O3
 DEBUG = -O0 -g -ftrapv
 
 CXXFLAGS = $(WARNS) $(VERSION) $(OPTLEVEL)
