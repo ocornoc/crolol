@@ -93,7 +93,7 @@ saferet backend::pow(int64_t n, int64_t m)
 		if (remain.flow != noflow) return remain;
 		
 		return multiply(remain.val, accum);
-	} else {
+	} else if (m < scale) {
 		return pow(sqrt(n), 2 * m);
-	}
+	} else throw std::invalid_argument("Failed pow, end of cases");
 }
