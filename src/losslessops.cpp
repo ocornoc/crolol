@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <limits>
 #include <numeric>
+#include <stdexcept>
 #include <boost/multiprecision/cpp_int.hpp>
 #include "losslessops.h"
 
@@ -59,30 +60,10 @@ saferet backend::divide(int64_t n, int64_t m)
 	else return clamp((static_cast<int128>(n) * scale) / static_cast<int128>(m));
 }
 
-using approx_table_type = std::array<int64_t, scale>;
-
-static int64_t approx_table_func(int64_t n)
-{
-	return static_cast<int64_t>(mp::sqrt(static_cast<int128>(n) * scale));
-}
-
-static approx_table_type approx_table()
-{
-	approx_table_type atab;
-	std::iota(atab.begin(), atab.end(), 0);
-	std::transform(atab.begin(), atab.end(), atab.begin(),
-		approx_table_func);
-	
-	return atab;
-}
-
-static const approx_table_type sqrt_approx = approx_table();
-
 // Assumes input is positive.
 static int64_t sqrt(int64_t n)
 {
-	if (n >= scale) return 2*sqrt(n / 4);
-	else return sqrt_approx.at(n);
+	return static_cast<int64_t>(mp::sqrt(static_cast<int128>(n) * scale));
 }
 
 saferet backend::pow(int64_t n, int64_t m)
@@ -100,14 +81,15 @@ saferet backend::pow(int64_t n, int64_t m)
 		return divide(scale, result.val);
 	} else if (m > scale) {
 		int64_t accum = scale;
+		int64_t i = 0;
 		
-		for (int64_t i = 0; i < m; i += scale) {
+		for (; i < m; i += scale) {
 			saferet result = multiply(n, accum);
 			if (result.flow != noflow) return result;
 			accum = result.val;
 		}
 		
-		const saferet remain = pow(n, m % scale);
+		const saferet remain = pow(n, m - i);
 		if (remain.flow != noflow) return remain;
 		
 		return multiply(remain.val, accum);
