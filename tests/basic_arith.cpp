@@ -282,6 +282,52 @@ bool pow_test()
 	return success;
 }
 
+const static std::vector<argans> mod_args = {
+	make_argans(make_args(1, 1), 0),
+	make_argans(make_args(1, 2), 1),
+	make_argans(make_args(2, 1), 0),
+	make_argans(make_args(5, 3), 2),
+	make_argans(make_args(-5, 3), 2),
+	make_argans(make_args(5, -3), -2),
+	make_argans(make_args(-5, -3), -2),
+	make_argansf(make_argsf(5.2, 3.1), 2.1),
+	make_argansf(make_argsf(-5.2, 3.1), 2.1),
+	make_argansf(make_argsf(5.2, -3.1), -2.1),
+	make_argansf(make_argsf(-5.2, -3.1), -2.1),
+	make_argansf(make_args(min, 1), 0.5807),
+	make_argansf(make_args(min, -1), -0.5807),
+	make_argansf(make_args(max, 1), 0.5807),
+	make_argansf(make_args(max, -1), -0.5807),
+};
+
+bool mod_test()
+{
+	bool success = true;
+	
+	for (const argans& arg_and_ans: mod_args) {
+		const crolol::num lhs = arg_and_ans.first.first;
+		const crolol::num rhs = arg_and_ans.first.second;
+		const crolol::num ans = arg_and_ans.second;
+		const crolol::num result = lhs % rhs;
+		
+		if (!crolol::equals(ans, result)) {
+			success = false;
+			
+			std::cout << static_cast<std::string>(lhs) << " % "
+				<< static_cast<std::string>(rhs)
+				<< " should be "
+				<< static_cast<std::string>(ans) << ", was "
+				<< static_cast<std::string>(result)
+				<< std::endl;
+		}
+	}
+	
+	std::cout << "Modulo: ";
+	report(success);
+	
+	return success;
+}
+
 int main()
 {
 	bool success = true;
@@ -291,6 +337,7 @@ int main()
 	success &= mul_test();
 	success &= div_test();
 	success &= pow_test();
+	success &= mod_test();
 	
 	return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }
