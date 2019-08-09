@@ -247,7 +247,6 @@ const static std::vector<argans> pow_args = {
 	make_argansf(make_args(5, -3), 0.008),
 	make_argansf(make_args(-5, -3), -0.008),
 	make_argansf(make_argsf(5.2, 3.1), 165.8098),
-	make_argansf(make_argsf(-5.2, 3.1), -165.8098),
 	make_argansf(make_argsf(5.2, -3.1), 0.006),
 	make_argans(make_args(min, 1), min),
 	make_argans(make_args(min, -1), 0),
