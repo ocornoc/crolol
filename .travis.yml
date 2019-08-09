@@ -20,9 +20,11 @@ addons:
   apt:
     packages:
     - libboost-dev
+    update: true
   homebrew:
     packages:
     - boost
+    update: true
 
 script:
   - make -j
