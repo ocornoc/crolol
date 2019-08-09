@@ -25,4 +25,5 @@ addons:
     - boost
 
 script:
-  - make -j debug
+  - make -j
+  - make test
