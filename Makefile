@@ -10,17 +10,19 @@ SRC = src
 TESTS = tests
 
 SRCCPPS = $(SRC)/num.cpp $(SRC)/losslessops.cpp
-BUILDOBJS = $(BUILD)/num_src.o $(BUILD)/losslessops_src.o
-TESTEXECS = basic_arith_EXEC
+COREBUILDOBJS = $(BUILD)/num_src.o $(BUILD)/losslessops_src.o
+TESTBUILDEXECS = $(BUILD)/basic_arith_test
+BUILDOBJS = $(COREBUILDOBJS) $(TESTBUILDOBJS)
+TESTEXEC = basic_arith_EXEC
 
 default: compile
 	
-compile: $(BUILD) $(BUILDOBJS)
+compile: $(BUILD) $(BUILDOBJS) $(TESTBUILDEXECS)
 	
-test: $(BUILD) $(TESTEXECS)
+test: debug $(TESTEXEC)
 
 debug: CXXFLAGS += $(DEBUG)
-debug: test
+debug: compile
 
 clean: $(BUILD)
 	rm -r $(BUILD)
@@ -36,7 +38,7 @@ $(BUILD)/%_src.o: $(SRC)/%.cpp
 $(BUILD)/%_test.o: $(TESTS)/%.cpp
 	$(CXX) $(CXXFLAGS) -c $^ -o $@
 
-$(BUILD)/%_test: $(BUILD)/%_test.o $(BUILDOBJS)
+$(BUILD)/%_test: $(BUILD)/%_test.o $(COREBUILDOBJS)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 %_EXEC: $(BUILD)/%_test
