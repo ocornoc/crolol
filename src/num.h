@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <string>
-#include <type_traits>
 
 namespace crolol {
 	class num;
