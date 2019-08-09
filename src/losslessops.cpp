@@ -64,12 +64,6 @@ saferet backend::divide(int64_t n, int64_t m)
 	else return clamp((static_cast<int128>(n) * scale) / static_cast<int128>(m));
 }
 
-// Assumes input is positive.
-static int64_t sqrt(int64_t n)
-{
-	return static_cast<int64_t>(mp::sqrt(static_cast<int128>(n) * scale));
-}
-
 saferet backend::pow(int64_t n, int64_t m)
 {
 	if (n < 0 && m % scale != 0) return make_badarg(m);
