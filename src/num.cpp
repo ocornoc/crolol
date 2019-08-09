@@ -35,10 +35,6 @@ constexpr static int64_t preclamp(int64_t bi) noexcept
 	return rawclamp(num_min / scale, bi, num_max / scale);
 }
 
-num::num(int64_t bi) noexcept
-	: bi(bi)
-{}
-
 num::num(bool b) noexcept
 	: bi(b ? num_truthy : num_falsy)
 {}

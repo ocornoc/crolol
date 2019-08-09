@@ -54,7 +54,8 @@ crolol::num operator--(crolol::num&, int);
 
 class crolol::num {
 	public:
-		num(std::int64_t) noexcept;
+		constexpr num(const std::int64_t bi) noexcept
+			: bi(bi) {};
 		explicit num(bool) noexcept;
 		
 		explicit operator std::string() const;
