@@ -6,6 +6,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/cpp_bin_float.hpp>
 #include "losslessops.h"
 
 using namespace crolol;
@@ -14,10 +15,13 @@ namespace mp = boost::multiprecision;
 using std::int64_t;
 using slims = std::numeric_limits<int64_t>;
 using int128 = mp::int128_t;
+using float128 = mp::cpp_bin_float_quad;
 
 static constexpr int64_t slmax = slims::max();
 static constexpr int64_t slmin = slims::min();
 static constexpr int64_t scale = 10000;
+static const float128 slmaxlog2 = mp::log2(static_cast<float128>(slmax) / scale);
+static const float128 slminlog2 = mp::log2(-static_cast<float128>(slmax) / scale);
 
 static saferet clamp(const int128& n)
 {
@@ -72,28 +76,12 @@ saferet backend::pow(int64_t n, int64_t m)
 	else if (n == 0 && m <= 0) return make_badarg(m);
 	else if (n == scale || m == 0) return clamp(scale);
 	else if (m == scale) return clamp(n);
-	else if (m < 0) {
-		const saferet result = pow(n, -m);
-		if (result.flow == overflow || result.flow == underflow)
-			return clamp(0);
-		else if (result.flow == badarg) return result;
-		
-		return divide(scale, result.val);
-	} else if (m > scale) {
-		int64_t accum = scale;
-		int64_t i = 0;
-		
-		for (; i < m; i += scale) {
-			saferet result = multiply(n, accum);
-			if (result.flow != noflow) return result;
-			accum = result.val;
-		}
-		
-		const saferet remain = pow(n, m - i);
-		if (remain.flow != noflow) return remain;
-		
-		return multiply(remain.val, accum);
-	} else if (m < scale) {
-		return pow(sqrt(n), 2 * m);
-	} else throw std::invalid_argument("Failed pow, end of cases");
+	
+	const float128 nf = static_cast<float128>(n) / scale;
+	const float128 mf = static_cast<float128>(m) / scale;
+	const float128 size = mp::log2(mp::abs(nf)) * mf;
+	
+	if (size > slmaxlog2) return clamp(slmax);
+	else if (mp::abs(size) > slminlog2) return clamp(slmin);
+	else return clamp(static_cast<int128>(mp::llrint(mp::trunc(mp::pow(nf, mf) * scale))));
 }
