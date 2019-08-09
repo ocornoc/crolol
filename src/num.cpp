@@ -24,6 +24,26 @@ constexpr static bigint num_max = l_lims::max();
 constexpr static bigint num_truthy = 1L * scale;
 constexpr static bigint num_falsy = 0L * scale;
 
+num num::min() noexcept
+{
+	return num_min;
+}
+
+num num::max() noexcept
+{
+	return num_max;
+}
+
+num num::truthy() noexcept
+{
+	return num_truthy;
+}
+
+num num::falsy() noexcept
+{
+	return num_falsy;
+}
+
 constexpr static int64_t rawclamp(int64_t left, int64_t mid, int64_t right)
 	noexcept
 {
@@ -71,11 +91,6 @@ int64_t num::getraw() const noexcept
 	return bi;
 }
 
-const num num::min = num_min;
-const num num::max = num_max;
-const num num::truthy = num_truthy;
-const num num::falsy = num_falsy;
-
 num::operator double() const
 {
 	return static_cast<double>(bi) / scale;
@@ -122,7 +137,7 @@ num& num::operator-=(num rhs)
 	if (((bi < 0) == (rhs.bi < 0)) ||
 		((rhs.bi == 0 || bi == 0) && rhs.bi != num_min))
 		bi -= rhs.bi;
-	else if (rhs.bi == num_min) *this += num::max;
+	else if (rhs.bi == num_min) *this += num::max();
 	else *this += -rhs.bi;
 	
 	return *this;
@@ -134,8 +149,8 @@ num& num::operator*=(num rhs)
 	
 	switch (result.flow) {
 		case backend::badarg: throw std::invalid_argument("Bad mult");
-		case backend::underflow: *this = num::min; return *this;
-		case backend::overflow: *this = num::max; return *this;
+		case backend::underflow: *this = num::min(); return *this;
+		case backend::overflow: *this = num::max(); return *this;
 		default: *this = result.val; return *this;
 	}
 }
@@ -146,8 +161,8 @@ num& num::operator/=(num rhs)
 	
 	switch (result.flow) {
 		case backend::badarg: throw std::invalid_argument("Bad div");
-		case backend::underflow: *this = num::min; return *this;
-		case backend::overflow: *this = num::max; return *this;
+		case backend::underflow: *this = num::min(); return *this;
+		case backend::overflow: *this = num::max(); return *this;
 		default: *this = result.val; return *this;
 	}
 }
@@ -203,7 +218,7 @@ num operator^(num lhs, num rhs)
 
 num operator!(num n)
 {
-	return n.bi == num_falsy ? num::truthy : num::falsy;
+	return n.bi == num_falsy ? num::truthy() : num::falsy();
 }
 
 num operator==(num lhs, num rhs)

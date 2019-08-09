@@ -23,8 +23,8 @@ void report(const bool b)
 	b ? success() : failure();
 }
 
-static const int64_t min = crolol::num::min.getraw();
-static const int64_t max = crolol::num::max.getraw();
+static const int64_t min = crolol::num::min().getraw();
+static const int64_t max = crolol::num::max().getraw();
 
 args make_args(int64_t n, int64_t m)
 {

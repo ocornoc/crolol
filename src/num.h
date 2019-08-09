@@ -76,10 +76,10 @@ class crolol::num {
 		num& operator=(num&&) noexcept = default;
 		~num() noexcept = default;
 		
-		const static num min;
-		const static num max;
-		const static num truthy;
-		const static num falsy;
+		static num min() noexcept;
+		static num max() noexcept;
+		static num truthy() noexcept;
+		static num falsy() noexcept;
 		
 		friend num (::operator+)(num, num);
 		friend num (::operator-)(num, num);
