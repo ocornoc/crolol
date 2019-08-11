@@ -1,5 +1,5 @@
 #!/bin/bash
-wget https://dl.bintray.com/boostorg/release/1.70.0/source/${BOOSTNAME}.zip
+wget -q https://dl.bintray.com/boostorg/release/1.70.0/source/${BOOSTNAME}.zip
 unzip -q ${BOOSTNAME}.zip
 cd ${BOOSTNAME}
 sudo ./bootstrap.sh
