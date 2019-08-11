@@ -16,15 +16,15 @@ matrix:
   - compiler: gcc
     os: osx
 
-addons:
-  apt:
-    packages:
-    - libboost-dev
-    update: true
-  homebrew:
-    packages:
-    - boost
-    update: true
+env: BOOSTNAME=boost_1_70_0
+
+install:
+  - wget https://dl.bintray.com/boostorg/release/1.70.0/source/${BOOSTNAME}.zip
+  - unzip -q ${BOOSTNAME}.zip
+  - cd ${BOOSTNAME}
+  - sudo ./bootstrap.sh
+  - sudo ./b2 install -j 2 -d0 --with-math
+  - cd ..
 
 script:
   - make -j
