@@ -23,7 +23,7 @@ cache:
     - ${BOOSTNAME}
 
 install:
-  - if [ ! -d "$BOOSTNAME" ]; then ./travis_make_cache.sh; fi
+  - if [ ! -d "$BOOSTNAME" || "$(ls -A ${BOOSTNAME})" ]; then ./travis_make_cache.sh; fi
   - cd ${BOOSTNAME}
   - sudo ./b2 install -j 2 -d0 --with-math
   - cd ..
