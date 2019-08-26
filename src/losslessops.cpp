@@ -65,7 +65,8 @@ saferet backend::divide(int64_t n, int64_t m)
 saferet backend::pow(int64_t n, int64_t m)
 {
 	if (n < 0 && m % scale != 0) return make_badarg(m);
-	else if (n == 0 && m <= 0) return make_badarg(m);
+	else if (n == 0 && m == 0) return clamp(scale);
+	else if (n == 0 && m < 0) return make_badarg(m);
 	else if (n == scale || m == 0) return clamp(scale);
 	else if (m == scale) return clamp(n);
 	
