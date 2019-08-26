@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <limits>
 #include <numeric>
@@ -78,5 +79,76 @@ saferet backend::pow(int64_t n, int64_t m)
 	else if (mp::abs(size) > slminlog2) return clamp(slmin);
 	else return clamp(static_cast<int128>(
 		mp::llrint(mp::trunc(mp::pow(nf, mf) * scale))
+	));
+}
+
+saferet backend::factorial(int64_t n)
+{
+	if (n < 0 or n % scale != 0) return make_badarg(n);
+	
+	saferet acc = clamp(scale);
+	
+	for (int64_t i = 0; i < n && acc.flow == noflow; i += scale)
+		acc = multiply(acc.val, i);
+	
+	return acc;
+}
+
+static const int64_t cr2pi = std::llrintl(std::truncl(M_PI * 2.L * scale));
+static constexpr long double radtodeg = 360.L / (M_PI * 2.L);
+static constexpr long double degtorad = (M_PI * 2.L) / 360.L;
+
+static long double trigmod(int64_t n)
+{
+	return static_cast<long double>(n % cr2pi) * degtorad / scale;
+}
+
+saferet backend::sin(int64_t n)
+{
+	return clamp(static_cast<int128>(
+		std::truncl(std::sin(trigmod(n))) * scale
+	));
+}
+
+saferet backend::cos(int64_t n)
+{
+	return clamp(static_cast<int128>(
+		std::truncl(std::cos(trigmod(n))) * scale
+	));
+}
+
+saferet backend::tan(int64_t n)
+{
+	return clamp(static_cast<int128>(
+		std::truncl(std::tan(trigmod(n))) * scale
+	));
+}
+
+saferet backend::asin(int64_t n)
+{
+	if (n > scale or n < -scale) return make_badarg(n);
+	else return clamp(static_cast<int128>(
+		std::truncl(std::asin(
+			static_cast<long double>(n) / scale
+		)) * scale * radtodeg
+	));
+}
+
+saferet backend::acos(int64_t n)
+{
+	if (n > scale or n < -scale) return make_badarg(n);
+	else return clamp(static_cast<int128>(
+		std::truncl(std::acos(
+			static_cast<long double>(n) / scale
+		)) * scale * radtodeg
+	));
+}
+
+saferet backend::atan(int64_t n)
+{
+	return clamp(static_cast<int128>(
+		std::truncl(std::atan(
+			static_cast<long double>(n) / scale
+		)) * scale * radtodeg
 	));
 }

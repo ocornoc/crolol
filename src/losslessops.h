@@ -14,6 +14,15 @@ namespace crolol {
 		saferet multiply(std::int64_t n, std::int64_t m);
 		saferet divide(std::int64_t n, std::int64_t m);
 		saferet pow(std::int64_t n, std::int64_t m);
+		saferet factorial(std::int64_t n);
+
+		// Trig
+		saferet sin(std::int64_t n);
+		saferet cos(std::int64_t n);
+		saferet tan(std::int64_t n);
+		saferet asin(std::int64_t n);
+		saferet acos(std::int64_t n);
+		saferet atan(std::int64_t n);
 	}
 }
 #endif
