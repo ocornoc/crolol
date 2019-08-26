@@ -1,10 +1,7 @@
 #include <algorithm>
-#include <array>
 #include <cstdint>
-#include <cstdlib>
 #include <limits>
 #include <numeric>
-#include <stdexcept>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include "losslessops.h"
