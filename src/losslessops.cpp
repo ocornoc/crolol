@@ -58,7 +58,8 @@ saferet backend::multiply(int64_t n, int64_t m)
 saferet backend::divide(int64_t n, int64_t m)
 {
 	if (m == 0) return make_badarg(n);
-	else return clamp((static_cast<int128>(n) * scale) / static_cast<int128>(m));
+	else return clamp((static_cast<int128>(n) * scale)
+		/ static_cast<int128>(m));
 }
 
 saferet backend::pow(int64_t n, int64_t m)
@@ -74,5 +75,7 @@ saferet backend::pow(int64_t n, int64_t m)
 	
 	if (size > slmaxlog2) return clamp(slmax);
 	else if (mp::abs(size) > slminlog2) return clamp(slmin);
-	else return clamp(static_cast<int128>(mp::llrint(mp::trunc(mp::pow(nf, mf) * scale))));
+	else return clamp(static_cast<int128>(
+		mp::llrint(mp::trunc(mp::pow(nf, mf) * scale))
+	));
 }
