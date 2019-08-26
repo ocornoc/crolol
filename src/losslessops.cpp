@@ -16,7 +16,7 @@ using float128 = mp::cpp_bin_float_quad;
 
 static constexpr int64_t slmax = slims::max();
 static constexpr int64_t slmin = slims::min();
-static constexpr int64_t scale = 10000;
+static constexpr int64_t scale = 1000;
 static const float128 slmaxlog2 = mp::log2(static_cast<float128>(slmax) / scale);
 static const float128 slminlog2 = mp::log2(-static_cast<float128>(slmax) / scale);
 

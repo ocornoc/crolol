@@ -18,7 +18,7 @@ using bigint = std::int64_t;
 using std::int64_t;
 using l_lims = std::numeric_limits<bigint>;
 
-constexpr static bigint scale = 10000;
+constexpr static bigint scale = 1000;
 constexpr static bigint num_min = l_lims::lowest();
 constexpr static bigint num_max = l_lims::max();
 constexpr static bigint num_truthy = 1L * scale;
