@@ -268,12 +268,12 @@ num operator-(num n)
 
 num& operator++(num& n)
 {
-	return n += 1;
+	return n += scale;
 }
 
 num& operator--(num& n)
 {
-	return n -= 1;
+	return n -= scale;
 }
 
 num operator++(num& n, int)
