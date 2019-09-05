@@ -68,7 +68,7 @@ num crolol::make_numi(int64_t bi) noexcept
 
 num crolol::make_numf(long double bf) noexcept
 {
-	return std::llrint(bf * scale);
+	return std::llrint(std::trunc(bf * scale));
 }
 
 bool crolol::equals(num lhs, num rhs)
