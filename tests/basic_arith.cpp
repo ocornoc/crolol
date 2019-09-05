@@ -294,10 +294,10 @@ const static std::vector<argans> mod_args = {
 	make_argansf(make_argsf(-5.2, 3.1), 2.1),
 	make_argansf(make_argsf(5.2, -3.1), -2.1),
 	make_argansf(make_argsf(-5.2, -3.1), -2.1),
-	make_argansf(make_args(min, 1), 0.5807),
-	make_argansf(make_args(min, -1), -0.5807),
-	make_argansf(make_args(max, 1), 0.5807),
-	make_argansf(make_args(max, -1), -0.5807),
+	make_argansf(make_args(min, 1), 0.807),
+	make_argansf(make_args(min, -1), -0.807),
+	make_argansf(make_args(max, 1), 0.807),
+	make_argansf(make_args(max, -1), -0.807),
 };
 
 bool mod_test()
