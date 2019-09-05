@@ -91,14 +91,14 @@ int64_t num::getraw() const noexcept
 	return bi;
 }
 
-num::operator double() const
+num::operator long double() const
 {
-	return static_cast<double>(bi) / scale;
+	return static_cast<long double>(bi) / scale;
 }
 
 num::operator std::string() const
 {
-	return std::to_string(static_cast<double>(*this));
+	return std::to_string(static_cast<long double>(*this));
 }
 
 num::operator int64_t() const

@@ -59,7 +59,7 @@ class crolol::num {
 		
 		explicit operator std::string() const;
 		explicit operator std::int64_t() const;
-		explicit operator double() const;
+		explicit operator long double() const;
 		explicit operator bool() const;
 		
 		// In order: addition, subtraction, multiplication, division,
